@@ -1,0 +1,98 @@
+# Max Tool - Complete Requirements with All Dependencies
+# جميع المكتبات المطلوبة للتطبيق
+
+# ==================== GUI Framework ====================
+PyQt6==6.6.1
+PyQt6-Qt6==6.6.1
+PyQt6-sip==13.6.0
+PyQt6-Charts==6.6.1
+PyQt6-WebEngine==6.6.1
+PyQt6-DataVisualization==6.6.1
+PyQt6-Svg==6.6.1
+PyQt6-OpenGL==6.6.1
+
+# ==================== Web & HTTP ====================
+requests>=2.31.0
+urllib3>=2.0.0
+aiohttp>=3.9.0
+urllib3-secure>=1.26.16
+
+# ==================== Database ====================
+SQLAlchemy>=2.0.0
+python-sqlite3-support>=1.0.0
+
+# ==================== Data Processing ====================
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+packaging>=23.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# ==================== System & Monitoring ====================
+psutil>=5.9.5
+watchdog>=3.0.0
+setproctitle>=1.3.0
+
+# ==================== Async & Threading ====================
+aiohttp>=3.9.0
+tortoise-orm>=0.19.0
+
+# ==================== Security & Encryption ====================
+cryptography>=41.0.0
+PyJWT>=2.8.0
+pycryptodome>=3.18.0
+
+# ==================== CLI & Utils ====================
+click>=8.1.0
+colorama>=0.4.6
+tabulate>=0.9.0
+progress>=1.6
+tqdm>=4.65.0
+rich>=13.5.0
+
+# ==================== Testing ====================
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-qt>=4.2.0
+unittest2>=1.1.0
+mock>=5.1.0
+
+# ==================== Code Quality ====================
+black>=23.0.0
+flake8>=6.1.0
+pylint>=3.0.0
+mypy>=1.7.0
+isort>=5.12.0
+
+# ==================== Documentation ====================
+Sphinx>=7.0.0
+sphinx-rtd-theme>=2.0.0
+markdown>=3.4.0
+
+# ==================== Logging & Monitoring ====================
+python-json-logger>=2.0.7
+sentry-sdk>=1.38.0
+watchdog>=3.0.0
+
+# ==================== Data Serialization ====================
+msgpack>=1.0.5
+protobuf>=4.24.0
+jsonschema>=4.19.0
+
+# ==================== API & Web ====================
+Flask>=2.3.0
+Flask-RESTful>=0.3.10
+Flask-SQLAlchemy>=3.0.0
+Flask-Cors>=4.0.0
+werkzeug>=2.3.0
+
+# ==================== Optional Performance ====================
+orjson>=3.9.0
+ujson>=5.8.0
+
+# ==================== System Integration ====================
+pywin32>=305; sys_platform == 'win32'
+pyobjc>=9.2; sys_platform == 'darwin'
+gnome-shell>=1.0; sys_platform == 'linux'
