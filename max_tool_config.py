@@ -52,7 +52,7 @@ class GUIConfig:
     style: str = "dark"
     window_width: int = 1400
     window_height: int = 900
-    window_state: str = "normal"  # normal, maximized, minimized
+    window_state: str = "normal"
     font_family: str = "Segoe UI"
     font_size: int = 10
     accent_color: str = "#2A82DA"
@@ -74,7 +74,7 @@ class PluginConfig:
 class UpdateConfig:
     """Update configuration"""
     check_enabled: bool = True
-    check_interval: int = 86400  # 24 hours
+    check_interval: int = 86400
     auto_download: bool = False
     auto_install: bool = False
     notify_user: bool = True
@@ -99,8 +99,8 @@ class PerformanceConfig:
     async_workers: int = 4
     max_concurrent_tasks: int = 10
     cache_enabled: bool = True
-    cache_size: int = 104857600  # 100MB
-    memory_limit: int = 1073741824  # 1GB
+    cache_size: int = 104857600
+    memory_limit: int = 1073741824
     thread_pool_size: int = 8
     enable_profiling: bool = False
 
@@ -115,7 +115,6 @@ class AppConfig:
     environment: Environment = Environment.PRODUCTION
     debug: bool = False
     
-    # Sub-configurations
     logging: LogConfig = field(default_factory=LogConfig)
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
     gui: GUIConfig = field(default_factory=GUIConfig)
@@ -124,7 +123,6 @@ class AppConfig:
     security: SecurityConfig = field(default_factory=SecurityConfig)
     performance: PerformanceConfig = field(default_factory=PerformanceConfig)
     
-    # Paths
     root_path: str = ""
     data_dir: str = "data"
     log_dir: str = "logs"
@@ -163,13 +161,11 @@ class ConfigurationManager:
             parser = configparser.ConfigParser()
             parser.read(self.config_file)
             
-            # Load main configuration
             if 'app' in parser:
                 for key, value in parser['app'].items():
                     if hasattr(self.config, key):
                         setattr(self.config, key, self._parse_value(value))
             
-            # Load sub-configurations
             self._load_section(parser, 'logging', self.config.logging)
             self._load_section(parser, 'database', self.config.database)
             self._load_section(parser, 'gui', self.config.gui)
@@ -207,7 +203,6 @@ class ConfigurationManager:
         """Save configuration to file"""
         parser = configparser.ConfigParser()
         
-        # Save main config
         parser['app'] = {
             'name': self.config.name,
             'version': self.config.version,
@@ -215,14 +210,13 @@ class ConfigurationManager:
             'debug': str(self.config.debug),
         }
         
-        # Save sub-configs
-        parser['logging'] = asdict(self.config.logging)
-        parser['database'] = asdict(self.config.database)
-        parser['gui'] = asdict(self.config.gui)
-        parser['plugins'] = asdict(self.config.plugins)
-        parser['updates'] = asdict(self.config.updates)
-        parser['security'] = asdict(self.config.security)
-        parser['performance'] = asdict(self.config.performance)
+        parser['logging'] = {k: str(v) for k, v in asdict(self.config.logging).items()}
+        parser['database'] = {k: str(v) for k, v in asdict(self.config.database).items()}
+        parser['gui'] = {k: str(v) for k, v in asdict(self.config.gui).items()}
+        parser['plugins'] = {k: str(v) for k, v in asdict(self.config.plugins).items()}
+        parser['updates'] = {k: str(v) for k, v in asdict(self.config.updates).items()}
+        parser['security'] = {k: str(v) for k, v in asdict(self.config.security).items()}
+        parser['performance'] = {k: str(v) for k, v in asdict(self.config.performance).items()}
         
         with open(self.config_file, 'w') as f:
             parser.write(f)
@@ -240,16 +234,6 @@ class ConfigurationManager:
                 self.save_config()
                 return True
         return False
-    
-    def export_config(self, format: str = "json") -> str:
-        """Export configuration"""
-        if format == "json":
-            return json.dumps(asdict(self.config), indent=2)
-        elif format == "ini":
-            parser = configparser.ConfigParser()
-            # Build parser sections
-            return str(parser)
-        return ""
 
 # ==================== SYSTEM INITIALIZATION ====================
 
@@ -266,7 +250,6 @@ class SystemInitializer:
             self._setup_directories()
             self._setup_logging()
             self._setup_database()
-            self._check_dependencies()
             return True
         except Exception as e:
             print(f"Initialization failed: {e}")
@@ -296,13 +279,12 @@ class SystemInitializer:
             datefmt=self.config.logging.date_format
         )
         
-        # File handler
-        log_file = log_dir / f"max_tool_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.log"
+        from datetime import datetime
+        log_file = log_dir / f"max_tool_{datetime.now().strftime('%Y%m%d')}.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         
-        # Console handler
         if self.config.logging.console_output:
             console_handler = logging.StreamHandler()
             console_handler.setFormatter(formatter)
@@ -315,31 +297,11 @@ class SystemInitializer:
         if self.config.database.engine == "sqlite":
             db_path = Path(self.config.database.path)
             db_path.parent.mkdir(parents=True, exist_ok=True)
-            if self.logger:
-                self.logger.info(f"Database configured: {db_path}")
-    
-    def _check_dependencies(self):
-        """Check required dependencies"""
-        required = [
-            "PyQt6",
-            "requests",
-            "packaging",
-        ]
-        
-        missing = []
-        for package in required:
-            try:
-                __import__(package)
-            except ImportError:
-                missing.append(package)
-        
-        if missing and self.logger:
-            self.logger.warning(f"Missing dependencies: {', '.join(missing)}")
 
 # ==================== ENVIRONMENT MANAGER ====================
 
 class EnvironmentManager:
-    """Manage environment variables and secrets"""
+    """Manage environment variables"""
     
     @staticmethod
     def load_env(env_file: str = ".env") -> Dict[str, str]:
@@ -357,121 +319,9 @@ class EnvironmentManager:
                             env_vars[key.strip()] = value.strip()
         
         return env_vars
-    
-    @staticmethod
-    def save_env(env_vars: Dict[str, str], env_file: str = ".env"):
-        """Save environment variables to .env file"""
-        with open(env_file, 'w') as f:
-            for key, value in env_vars.items():
-                f.write(f"{key}={value}\n")
-    
-    @staticmethod
-    def get_env(key: str, default: str = None) -> Optional[str]:
-        """Get environment variable"""
-        return os.getenv(key, default)
-
-# ==================== DEFAULT CONFIGURATION TEMPLATE ====================
-
-DEFAULT_CONFIG_TEMPLATE = """
-# Max Tool - Configuration File
-# Professional Integrated Platform
-
-[app]
-name = Max Tool
-version = 1.0.0
-author = Professional Team
-debug = False
-
-[logging]
-level = INFO
-format = %%(asctime)s - [%%(levelname)s] - %%(name)s - %%(funcName)s:%%(lineno)d - %%(message)s
-max_file_size = 52428800
-backup_count = 10
-
-[database]
-engine = sqlite
-path = data/max_tool.db
-echo = False
-pool_size = 5
-
-[gui]
-theme = fusion
-style = dark
-window_width = 1400
-window_height = 900
-font_size = 10
-
-[plugins]
-directory = plugins
-auto_load = True
-check_permissions = True
-max_plugins = 100
-
-[updates]
-check_enabled = True
-check_interval = 86400
-auto_download = False
-auto_install = False
-
-[security]
-enable_ssl = True
-verify_certificates = True
-max_retries = 3
-timeout = 30
-
-[performance]
-async_workers = 4
-max_concurrent_tasks = 10
-cache_enabled = True
-"""
-
-# ==================== SETUP UTILITIES ====================
-
-def create_default_config(config_file: str = "config.ini"):
-    """Create default configuration file"""
-    with open(config_file, 'w') as f:
-        f.write(DEFAULT_CONFIG_TEMPLATE)
-    print(f"Default configuration created: {config_file}")
-
-def setup_project():
-    """Setup project directories and files"""
-    directories = [
-        "data",
-        "logs",
-        ".cache",
-        "plugins",
-        "tests",
-        "docs",
-    ]
-    
-    for dir_name in directories:
-        Path(dir_name).mkdir(exist_ok=True)
-        print(f"Created directory: {dir_name}")
-    
-    # Create default config
-    create_default_config()
-
-# ==================== ENTRY POINT ====================
 
 if __name__ == "__main__":
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Max Tool Configuration Manager")
-    parser.add_argument("--setup", action="store_true", help="Setup project directories")
-    parser.add_argument("--create-config", action="store_true", help="Create default config")
-    parser.add_argument("--validate", action="store_true", help="Validate configuration")
-    
-    args = parser.parse_args()
-    
-    if args.setup:
-        setup_project()
-    elif args.create_config:
-        create_default_config()
-    elif args.validate:
-        config_mgr = ConfigurationManager()
-        print("Configuration is valid!")
-        print(f"App Name: {config_mgr.config.name}")
-        print(f"Version: {config_mgr.config.version}")
-        print(f"Environment: {config_mgr.config.environment.value}")
-    else:
-        parser.print_help()
+    config_mgr = ConfigurationManager()
+    config = config_mgr.get_config()
+    print(f"App: {config.name} v{config.version}")
+    print(f"Environment: {config.environment.value}")
